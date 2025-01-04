@@ -218,10 +218,10 @@ void countXMins(byte minutesMax) {
   myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
   for(minutes = 0; minutes < minutesMax; minutes++) {
     for(seconds = 0; seconds < 60; seconds++) {
-      myDisplay.displayChar(1, minutes / 10);             // Print the minutes (x10) in the 1st digit.
-      myDisplay.displayChar(2, minutes % 10);             // Print the minutes (units) in the 2nd digit.
-      myDisplay.displayChar(3, seconds / 10);             // Print the seconds (x10) in the 3rd digit.
-      myDisplay.displayChar(4, seconds % 10);             // Print the seconds (units) in the 4th digit.
+      myDisplay.displayChar(1, minutes / 10);             // Print the minutes (x10) in the 2nd digit.
+      myDisplay.displayChar(2, minutes % 10);             // Print the minutes (units) in the 3rd digit.
+      myDisplay.displayChar(3, seconds / 10);             // Print the seconds (x10) in the 4th digit.
+      myDisplay.displayChar(4, seconds % 10);             // Print the seconds (units) in the 5th digit.
       delay(1000);
     }
   }
@@ -232,7 +232,7 @@ void countXMinsDP(byte minutesMax) {
   byte minutes = 0, seconds = 0;
   unsigned long timeNow, timeMark;
   timeMark = millis();
-  if(minutesMax > 100) {                                   // Clip the number at the maximum for a 4-digit MM.SS timer.
+  if(minutesMax > 100) {                                  // Clip the number at the maximum for a 4-digit MM.SS timer.
     minutesMax = 100;
   }
   myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
@@ -245,10 +245,10 @@ void countXMinsDP(byte minutesMax) {
       myDisplay.displayDP(2, dPoint);
       // Update the display and increment the time.
       if(dPoint) {
-        myDisplay.displayChar(1, minutes / 10);             // Print the minutes (x10) in the 1st digit.
-        myDisplay.displayChar(2, minutes % 10);             // Print the minutes (units) in the 2nd digit.
-        myDisplay.displayChar(3, seconds / 10);             // Print the seconds (x10) in the 3rd digit.
-        myDisplay.displayChar(4, seconds % 10);             // Print the seconds (units) in the 4th digit.
+        myDisplay.displayChar(1, minutes / 10);           // Print the minutes (x10) in the 2nd digit.
+        myDisplay.displayChar(2, minutes % 10);           // Print the minutes (units) in the 3rd digit.
+        myDisplay.displayChar(3, seconds / 10);           // Print the seconds (x10) in the 4th digit.
+        myDisplay.displayChar(4, seconds % 10);           // Print the seconds (units) in the 5th digit.
         if(++seconds == 60) {
           seconds = 0;
           minutes++;
