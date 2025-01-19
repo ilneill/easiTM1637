@@ -2,7 +2,7 @@
  * An Easy TM1637 Arduino Library.
  *  Simple, functional, optimal, and all in a class!
  *
- * The TM1637 is an (up to) 6-Digit 7-Segment (+ dps) LED display driver.
+ * The TM1637 is an (up to) 6-Digit 7-Segment (+dps) LED display driver.
  *
  * Written for the Arduino Uno/Nano/Mega.
  * (c) Ian Neill 2025
@@ -34,12 +34,17 @@
   #define __TM1637_H
   #include <Arduino.h>
   
+  #define ON          HIGH
+  #define OFF         LOW
+
   // Compile time control for the TM1637 addressing mode.
   //#define USEADDRAUTOMODE
   
   // Command and address definitions for the TM1637.
   #define ADDR_AUTO       0x40
   #define ADDR_FIXED      0x44
+  #define DISP_OFF        0x80
+  #define DISP_ON         0x88
   #define STARTADDR       0xc0 
 
   // The decimal points are controlled via bit 7 of each digit.
@@ -76,13 +81,13 @@
       void displayInt8(uint8_t, uint8_t, bool = true);    // Display a decimal integer between 0 - 99, or a hex integer between 0x00 - 0xff, starting at a specific digit.
       void displayInt12(uint8_t, uint16_t, bool = true);  // Display a decimal integer between 0 - 999, or a hex integer between 0x000 - 0xfff, starting at a specific digit.
       void displayInt16(uint8_t, uint16_t, bool = true);  // Display a decimal integer between 0 - 9999, or a hex integer between 0x0000 - 0xffff, starting at a specific digit.
-      void displayDP(uint8_t, bool = false);              // Turn ON/OFF the decimal point in a specific digit.
+      void displayDP(uint8_t, bool = OFF);                // Turn ON/OFF the decimal point in a specific digit.
     private:
       uint8_t _clkPin;                                    // The current TM1637 clock pin.
       uint8_t _dataPin;                                   // The current TM1637 data pin.
-      uint8_t _numDigits;                                 // The number of TM1637 digits.
+      uint8_t _numDigits;                                 // The number of TM1637 module digits.
       uint8_t _brightness;                                // The current TM1637 display brightness.
-      uint8_t _registers[MAX_DIGITS] = {0};               // An array used to hold the LED display digit values.
+      uint8_t _registers[MAX_DIGITS] = {0};               // An array used to hold the TM1638 display digit values.
       #ifndef USEADDRAUTOMODE
         uint8_t* _tmDigitMap;                             // A pointer to the physical to logical digit mapping.
         static uint8_t tmDigitMapDefault[];               // An array to hold the default physical to logical digit mapping.

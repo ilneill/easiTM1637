@@ -84,7 +84,7 @@ __void displayInt12(uint8_t digit, uint16_t number, bool useDec = true);__
 __void displayInt16(uint8_t digit, uint16_t number, bool useDec = true);__
 * Display a decimal integer between 0 - 9999, or a hex integer between 0x0000 - 0xffff, starting at a specific digit. Returns nothing.
 
-__void displayDP(uint8_t digit, bool status = false);__
+__void displayDP(uint8_t digit, bool status = OFF);__
 * Turn ON/OFF the decimal point for the specified digit. Returns nothing.
 
 ### TM1637 Addressing Modes
@@ -140,6 +140,14 @@ With my particular TM1637 display the __tmDigitMap__ array is {2, 1, 0, 5, 4, 3}
 Without the logical to physical mapping array, trying to display "012345" would actually display "210543". Notice how the untranslated display of "012345" gives the logical to physical mapping array that corrects (translates) the display!
 
 As a consequence of the logical addressing not necessarily incrementing left to right with the physical digits, I had to introduce support for the TM1637 fixed address mode. This allows the address of each digit to be specified before it is written. Contrast this with automatic address mode where the address is only specified at the beginning and incremented automatically by the TM1637 after each digit write.
+
+
+### API Defaults (AKA My Assumptions)
+As I only have one type of TM1637 based module, I have made some assumptions with only it in mind.
+
+Specifically:
+* TM1637 fixed-addressing mode is enabled.
+* The demo script uses a logical to physical mapping array of {2, 1, 0, 5, 4, 3}.
 
 
 ## TM1637 Chip Pinout

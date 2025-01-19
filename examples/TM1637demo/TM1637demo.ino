@@ -14,16 +14,16 @@
 
 #include "easiTM1637.h"
 
-#define ON        HIGH
-#define OFF       LOW
+#define ON          HIGH
+#define OFF         LOW
 
 // Pin definitions for the TM1637 - the interface might look like I2C, but it is not!
-#define CLKPIN    2                                       // Clock.
-#define DIOPIN    3                                       // Data In/Out.
-#define LEDPIN    13                                      // The builtin LED.
+#define CLKPIN      2                                     // Clock.
+#define DIOPIN      3                                     // Data In/Out.
+#define LEDPIN      13                                    // The builtin LED.
 
 // The number of digits in the TM1637 based LED display.
-#define NUMDIGITS 6
+#define NUMDIGITS   6
 
 // A table to describe the physical to logical digit numbering.
 // This can be determined the when this demo first runs with the default map.
@@ -37,9 +37,11 @@ void setup() {
   digitalWrite(LEDPIN, OFF);
   Serial.begin(9600);
   // TM1637 auto addressing mode, or fixed addressing mode and the default digit map.
-  //myDisplay.begin(NUMDIGITS, INTENSITY_TYP);              // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
+  // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
+  //myDisplay.begin(NUMDIGITS, INTENSITY_TYP);
   // TM1637 fixed addressing mode using a supplied digit map.
-  myDisplay.begin(tmDigitMap, NUMDIGITS, INTENSITY_TYP);  // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
+  // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
+  myDisplay.begin(tmDigitMap, NUMDIGITS, INTENSITY_TYP);
   Serial.println("\nDisplay physical to logical mapping test.");
   findDigitMap();
   Serial.println("\nDisplay brightness and digit test.");
@@ -117,11 +119,11 @@ void findDigitMap() {
   // Pulse the decimal points as a bar, giving some time to note down the number on the TM1637 based LED display.
   for(counter = 0; counter < NUMDIGITS; counter++) {
     for(digit = 0; digit < NUMDIGITS; digit++) {
-      myDisplay.displayDP(digit, true);
+      myDisplay.displayDP(digit, ON);
       delay(100);
     }
     for(digit = 0; digit < NUMDIGITS; digit++) {
-      myDisplay.displayDP((NUMDIGITS - digit - 1), false);
+      myDisplay.displayDP((NUMDIGITS - digit - 1), OFF);
       delay(100);
     }
   }
@@ -129,7 +131,7 @@ void findDigitMap() {
 }
 
 void testDisplay() {
-  byte brightness, digit, character;
+  byte digit, brightness, character;
   // Display brightness test.
   for(brightness = INTENSITY_MIN; brightness <= INTENSITY_MAX; brightness++) {
     myDisplay.displayBrightness(brightness);
@@ -152,9 +154,9 @@ void testDisplay() {
   // Decimal points ON/OFF test.
   myDisplay.displayClear();
   for(digit = 0; digit < NUMDIGITS; digit++) {
-    myDisplay.displayDP(digit, true);
+    myDisplay.displayDP(digit, ON);
     delay(500);
-    myDisplay.displayDP(digit, false);
+    myDisplay.displayDP(digit, OFF);
     delay(500);
   }
  }
@@ -181,8 +183,8 @@ void countHex12(uint32_t interval) {
 
 void countHex16(uint32_t interval) {
   uint16_t counter = 0;
-  myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
-  myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
+  myDisplay.displayChar(0, 0x26);                         // Print a left-border character in the 1st digit.
+  myDisplay.displayChar(5, 0x27);                         // Print a right-border character in the 6th digit.
   do {
     myDisplay.displayInt16(1, counter, false);            // Print the 16-bit count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
@@ -191,8 +193,8 @@ void countHex16(uint32_t interval) {
 
 void countUp(uint16_t number, uint32_t interval) {
   int16_t counter;
-  myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
-  myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
+  myDisplay.displayChar(0, 0x26);                         // Print a left-border character in the 1st digit.
+  myDisplay.displayChar(5, 0x27);                         // Print a right-border character in the 6th digit.
   for(counter = 0; counter <= number; counter++) {
     myDisplay.displayInt16(1, counter);                   // Print the 0 - 9999 count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
@@ -201,8 +203,8 @@ void countUp(uint16_t number, uint32_t interval) {
 
 void countDown(uint16_t number, uint32_t interval) {
   int16_t counter;
-  myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
-  myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
+  myDisplay.displayChar(0, 0x26);                         // Print a left-border character in the 1st digit.
+  myDisplay.displayChar(5, 0x27);                         // Print a right-border character in the 6th digit.
   for(counter = number; counter >= 0; counter--) {
     myDisplay.displayInt16(1, counter);                   // Print the 9999 - 0 count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
@@ -214,8 +216,8 @@ void countXMins(byte minutesMax) {
   if(minutesMax > 100) {                                  // Clip the number at the maximum for a 4-digit MM.SS timer.
     minutesMax = 100;
   }
-  myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
-  myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
+  myDisplay.displayChar(0, 0x26);                         // Print a left-border character in the 1st digit.
+  myDisplay.displayChar(5, 0x27);                         // Print a right-border character in the 6th digit.
   for(minutes = 0; minutes < minutesMax; minutes++) {
     for(seconds = 0; seconds < 60; seconds++) {
       myDisplay.displayChar(1, minutes / 10);             // Print the minutes (x10) in the 2nd digit.
@@ -228,15 +230,15 @@ void countXMins(byte minutesMax) {
 }
 
 void countXMinsDP(byte minutesMax) {
-  bool dPoint = true;
+  bool dPoint = ON;
   byte minutes = 0, seconds = 0;
   unsigned long timeNow, timeMark;
   timeMark = millis();
   if(minutesMax > 100) {                                  // Clip the number at the maximum for a 4-digit MM.SS timer.
     minutesMax = 100;
   }
-  myDisplay.displayChar(0, 0x23);                         // Print an LEFT-END in the 1st digit.
-  myDisplay.displayChar(5, 0x24);                         // Print an RIGHT-END in the 6th digit.
+  myDisplay.displayChar(0, 0x26);                         // Print a left-border character in the 1st digit.
+  myDisplay.displayChar(5, 0x27);                         // Print a right-border character in the 6th digit.
   while (minutes != minutesMax || !dPoint) {
     timeNow = millis();
     if(timeNow - timeMark >= 500) {
