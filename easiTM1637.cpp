@@ -9,6 +9,7 @@
  * GPL(v3) Licence
  *
  * Built on my TM1651 library, which was built on work by Derek Cooper.
+ * ... with some developments backported into this library from my TM1638 and MAX7219 libraries.
  *
  ***************************************************************
  * LED Segments:         a
@@ -114,6 +115,27 @@ void TM1637::displayBrightness(uint8_t brightness) {
   _brightness = brightness & INTENSITY_MAX;               // Record the TM1637 brightness level.
   cmdDispCtrl = DISP_ON + _brightness;                    // 88 + 0 to 7 brightness, 88 = display ON.
   this->writeCommand(cmdDispCtrl);                        // Set the brightness and turn the display ON.
+}
+
+// Test the display - all the display digit segments (+dps).
+void TM1637::displayTest(bool dispTest) {
+  uint8_t digit;
+  this->writeCommand(ADDR_AUTO);                          // Cmd to set auto incrementing address mode.
+  this->start();                                          // Send the start signal to the TM1637.
+  this->writeByte(STARTADDR);                             // Set the address to the first digit.
+  if(dispTest) {
+    // Turn ON all digit segments (+dps).
+    for(digit = 0; digit < _numDigits; digit++) {
+      this->writeByte(0xff);                              // Direct write to turn all digit segments (+dps) ON.
+    }
+  }
+  else {
+    // Restore all the digit segments (+dps) to their previous values.
+    for(digit = 0; digit < _numDigits; digit++) {
+      this->writeByte(_registers[digit]);                // Restore the digit segments (+dps) to what they were.
+    }
+  }
+  this->stop();                                           // Send the stop signal to the TM1637.
 }
 
 // Display a character in a specific LED digit.

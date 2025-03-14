@@ -4,7 +4,7 @@ This is a very simple Arduino Library to control the TM1637 (up to) 6-digit (+ d
 
 ![A Common TM1637 Module](images/TM1637-Front.jpg)
 
-The TM1637 is a small IC that can control up to six 7-segment LED display digits, each with an individually controlable decimal point. It also has a keyboard scan interface, but that feature is not supported by this library. It uses a 2-wire serial interface that initially appears similar to the I2C bus, but it is not I2C and the protocol is very different.
+The TM1637 is a small IC that can control up to six 7-segment LED display digits, each with an individually controllable decimal point. It also has a keyboard scan interface, but that feature is not supported by this library. It uses a 2-wire serial interface that initially appears similar to the I2C bus, but it is not I2C and the protocol is very different.
 
 
 ## Why... Why Indeed?
@@ -71,6 +71,9 @@ __void displayClear(void);__
 
 __void displayBrightness(uint8_t brightness = 2);__
 * Set the brightness (0x00 - 0x07) and turn the TM1637 display ON. Returns nothing.
+
+__void displayTest(bool dispTest = false);__
+* Test all the display segments (+dps). True turns ON all digit segments (+dps). False restores their previous values. Returns nothing.
 
 __void displayChar(uint8_t digit, uint8_t number, bool raw  = false);__
 * Display a character in a specific LED digit. Returns nothing.

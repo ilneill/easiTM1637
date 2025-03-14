@@ -6,6 +6,7 @@
  * GPL(v3) Licence
  *
  * Built on my TM1651 library demo for the LEDC68 LED module.
+ * ... with some developments backported into this TM1637 demo from my TM1638 and MAX7219 demos.
  *
  * ****************************
  * *  easiTM1637 Demo Sketch  *
@@ -44,7 +45,7 @@ void setup() {
   myDisplay.begin(tmDigitMap, NUMDIGITS, INTENSITY_TYP);
   Serial.println("\nDisplay physical to logical mapping test.");
   findDigitMap();
-  Serial.println("\nDisplay brightness and digit test.");
+  Serial.println("\nDisplay brightness and digit tests.");
   testDisplay();
   blinkLED(100);
   delay(1000);
@@ -53,9 +54,9 @@ void setup() {
 void loop() {
   unsigned long timeNow;                                  // Used to time the 10 and 20 min delay demos.
   
-  // 8-bit hex number count up, 0x00 - 0xFF, 1 count/125ms.
+  // 8-bit hex number count up, 0x00 - 0xFF, 1 count/250ms.
   Serial.println("Demo 1: 8-bit hex count up.");
-  countHex8(125);
+  countHex8(250);
   blinkLED(100);
   delay(1000);
   
@@ -127,39 +128,46 @@ void findDigitMap() {
       delay(100);
     }
   }
+  // Ensure we clear the display as we leave the digit mapping function.
   myDisplay.displayClear();
 }
 
 void testDisplay() {
-  byte digit, brightness, character;
+  byte counter, brightness, character;
   // Display brightness test.
   for(brightness = INTENSITY_MIN; brightness <= INTENSITY_MAX; brightness++) {
     myDisplay.displayBrightness(brightness);
-    for(digit = 0; digit < NUMDIGITS; digit++) {
-      myDisplay.displayChar(digit, brightness);
+    for(counter = 0; counter < NUMDIGITS; counter++) {
+      myDisplay.displayChar(counter, brightness);
     }
     delay(1000);
   }
   // Clear the display and set the brightness to the typical value.
   myDisplay.displayClear();
   myDisplay.displayBrightness(INTENSITY_TYP);
-  // Display all characters on each digit.
-  for(digit = 0; digit < NUMDIGITS; digit++) {
-    // Cycle through each code in the character table, deliberately exceeding the table size by 1 to finish on a default space (0x00).
-    for(character = 0; character <= myDisplay.charTableSize; character++) {
-      myDisplay.displayChar(digit, character);
-      delay(200);
+  // Cycle through each code in the character table, deliberately exceeding the table size by 1 to finish on a default space (0x00).
+  for(character = 0; character <= myDisplay.charTableSize; character++) {
+    // Display all characters on all display digits.
+    for(counter = 0; counter < NUMDIGITS; counter++) {
+      myDisplay.displayChar(counter, character);
     }
+    delay(500);
   }
-  // Decimal points ON/OFF test.
+  // Decimal point ON/OFF test for each display digit.
   myDisplay.displayClear();
-  for(digit = 0; digit < NUMDIGITS; digit++) {
-    myDisplay.displayDP(digit, ON);
-    delay(500);
-    myDisplay.displayDP(digit, OFF);
-    delay(500);
+  for(counter = 0; counter < NUMDIGITS; counter++) {
+    myDisplay.displayDP(counter, ON);
+    delay(250);
+    myDisplay.displayDP(counter, OFF);
+    delay(250);
   }
- }
+  // All segments and decimal points ON, then restored.
+  myDisplay.displayTest(true);
+  delay(2000);
+  myDisplay.displayTest(false);
+  // Ensure we clear the display (+dps) as we leave the display test function.
+  myDisplay.displayClear();
+}
 
 void countHex8(uint32_t interval) {
   byte counter = 0;
@@ -170,6 +178,8 @@ void countHex8(uint32_t interval) {
     myDisplay.displayInt8(4, counter, false);             // Print the 8-bit count in the 5th and 6th digits.
     delay(interval);
   } while(++counter != 0);                                // The counter is an 8-bit number that will wrap to zero.
+  // Ensure we clear the display (+dps) as we leave the 8-bit counter function.
+  myDisplay.displayClear();
 }
 
 void countHex12(uint32_t interval) {
@@ -179,6 +189,8 @@ void countHex12(uint32_t interval) {
     myDisplay.displayInt12(3, counter, false);            // Print the 12-bit count in the 4th, 5th and 6th digits.
     delay(interval);
   } while(++counter != 0x1000);                           // The counter is a 16-bit number, so watch for it crossing the 12-bit boundry.
+  // Ensure we clear the display (+dps) as we leave the 12-bit counter function.
+  myDisplay.displayClear();
 }
 
 void countHex16(uint32_t interval) {
@@ -189,6 +201,8 @@ void countHex16(uint32_t interval) {
     myDisplay.displayInt16(1, counter, false);            // Print the 16-bit count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
   } while(++counter != 0);                                // The counter is a 16-bit number that will wrap to zero.
+  // Ensure we clear the display (+dps) as we leave the 16-bit counter function.
+  myDisplay.displayClear();
 }
 
 void countUp(uint16_t number, uint32_t interval) {
@@ -199,6 +213,8 @@ void countUp(uint16_t number, uint32_t interval) {
     myDisplay.displayInt16(1, counter);                   // Print the 0 - 9999 count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
   }
+  // Ensure we clear the display (+dps) as we leave the count up function.
+  myDisplay.displayClear();
 }
 
 void countDown(uint16_t number, uint32_t interval) {
@@ -209,6 +225,8 @@ void countDown(uint16_t number, uint32_t interval) {
     myDisplay.displayInt16(1, counter);                   // Print the 9999 - 0 count in the 1st, 2nd, 3rd and 4th digits.
     delay(interval);
   }
+  // Ensure we clear the display (+dps) as we leave the count down function.
+  myDisplay.displayClear();
 }
 
 void countXMins(byte minutesMax) {
@@ -227,6 +245,8 @@ void countXMins(byte minutesMax) {
       delay(1000);
     }
   }
+  // Ensure we clear the display (+dps) as we leave the timer function.
+  myDisplay.displayClear();
 }
 
 void countXMinsDP(byte minutesMax) {
@@ -260,6 +280,8 @@ void countXMinsDP(byte minutesMax) {
       dPoint = !dPoint;
     }
   };
+  // Ensure we clear the display (+dps) as we leave the timer function.
+  myDisplay.displayClear();
 }
 
 // EOF
