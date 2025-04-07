@@ -43,7 +43,7 @@ uint8_t TM1637::tmCharTable[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07,
                                  0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40};                  // Segments: SegA, SegB, SegC, SegD, SegE, SegF, SegG.
 
 // A table to describe the physical to logical digit numbering.
-#ifndef USEADDRAUTOMODE
+#ifndef USEADDRAUTOMODE37
   // This map assumes that the digits are logically addressed in the same order as they are physically built.
   uint8_t TM1637::tmDigitMapDefault[] = {0, 1, 2, 3, 4, 5};
 #endif
@@ -63,10 +63,10 @@ TM1637::TM1637(uint8_t clkPin, uint8_t dataPin) {
 
 // Set up the display and initialise it with defaults values - with the default or no digit map.
 void TM1637::begin(uint8_t numDigits, uint8_t brightness) {
-  #ifndef USEADDRAUTOMODE
+  #ifndef USEADDRAUTOMODE37
     _tmDigitMap = tmDigitMapDefault;
   #endif
-  if(numDigits > 0 && numDigits <= MAX_DIGITS) {          // The TM1637 module supports between up to 6 digits.
+  if(numDigits > 0 && numDigits <= MAX_DIGITS37) {        // The TM1637 module supports between up to 6 digits.
     _numDigits = numDigits;
   }
   else {
@@ -78,11 +78,11 @@ void TM1637::begin(uint8_t numDigits, uint8_t brightness) {
   this->displayBrightness(brightness);                    // Set the display to the chosen (or default) brightness.
 }
 
-#ifndef USEADDRAUTOMODE
+#ifndef USEADDRAUTOMODE37
   // Set up the display and initialise it with defaults values - with a supplied digit map.
   void TM1637::begin(uint8_t* tmDigitMap, uint8_t numDigits, uint8_t brightness) {
   _tmDigitMap = tmDigitMap;
-  if(numDigits > 0 && numDigits <= MAX_DIGITS) {          // The TM1637 module supports up to 6 digits.
+  if(numDigits > 0 && numDigits <= MAX_DIGITS37) {        // The TM1637 module supports up to 6 digits.
     _numDigits = numDigits;
   }
   else {
@@ -97,7 +97,7 @@ void TM1637::begin(uint8_t numDigits, uint8_t brightness) {
 
 // Turn the TM1637 display OFF.
 void TM1637::displayOff(void) {
-  cmdDispCtrl = DISP_OFF;                                 // 0x80 = display OFF.
+  cmdDispCtrl = DISP_OFF37;                               // 0x80 = display OFF.
   this->writeCommand(cmdDispCtrl);                        // Turn the display OFF.
 }
 
@@ -112,17 +112,17 @@ void TM1637::displayClear(void) {
 
 // Set the brightness (0x00 - 0x07) and turn the TM1637 display ON.
 void TM1637::displayBrightness(uint8_t brightness) {
-  _brightness = brightness & INTENSITY_MAX;               // Record the TM1637 brightness level.
-  cmdDispCtrl = DISP_ON + _brightness;                    // 88 + 0 to 7 brightness, 88 = display ON.
+  _brightness = brightness & INTENSITY_MAX37;             // Record the TM1637 brightness level.
+  cmdDispCtrl = DISP_ON37 + _brightness;                  // 0x88 + 0x00 to 0x07 brightness, 0x88 = display ON.
   this->writeCommand(cmdDispCtrl);                        // Set the brightness and turn the display ON.
 }
 
 // Test the display - all the display digit segments (+dps).
 void TM1637::displayTest(bool dispTest) {
   uint8_t digit;
-  this->writeCommand(ADDR_AUTO);                          // Cmd to set auto incrementing address mode.
+  this->writeCommand(ADDR_AUTO37);                        // Cmd to set auto incrementing address mode.
   this->start();                                          // Send the start signal to the TM1637.
-  this->writeByte(STARTADDR);                             // Set the address to the first digit.
+  this->writeByte(STARTADDR37);                           // Set the address to the first digit.
   if(dispTest) {
     // Turn ON all digit segments (+dps).
     for(digit = 0; digit < _numDigits; digit++) {
@@ -132,7 +132,7 @@ void TM1637::displayTest(bool dispTest) {
   else {
     // Restore all the digit segments (+dps) to their previous values.
     for(digit = 0; digit < _numDigits; digit++) {
-      this->writeByte(_registers[digit]);                // Restore the digit segments (+dps) to what they were.
+      this->writeByte(_registers[digit]);                 // Restore the digit segments (+dps) to what they were.
     }
   }
   this->stop();                                           // Send the stop signal to the TM1637.
@@ -143,17 +143,17 @@ void TM1637::displayChar(uint8_t digit, uint8_t number, bool raw) {
   if(digit < _numDigits) {                                // Boundry check the digit number, leftmost digit is #0.
     if(raw) {                                             // If this is a raw segment bit number, ensure there are only 7 bits.
       number &= 0x7f;
-      number |= (_registers[digit] & DP_CTRL);            // Merge the segment number with the dp (bit 7) status.
+      number |= (_registers[digit] & DP_CTRL37);          // Merge the segment number with the dp (bit 7) status.
     }
     else {                                                // If using the character table, ensure the number is within the character table.
       if(number >= charTableSize) {
         number = 0x20;                                    // This is a 0x00 (space) in the character table.
       }
       number = tmCharTable[number];                       // Get the raw number from the character table.
-      number |= (_registers[digit] & DP_CTRL);            // Merge the segment number with the dp (bit 7) status.
+      number |= (_registers[digit] & DP_CTRL37);          // Merge the segment number with the dp (bit 7) status.
     }
     _registers[digit] = number;                           // Record the latest value for this LED digit.
-    this->writeCommand(ADDR_FIXED);                       // Cmd to set specific address mode.
+    this->writeCommand(ADDR_FIXED37);                     // Cmd to set specific address mode.
     this->writeDigit(digit);                              // Write the character digit to the display.
   }
 }
@@ -165,18 +165,18 @@ void TM1637::displayInt8(uint8_t digit, uint8_t number, bool useDec) {
       if(number > 99) {                                   // Clip the number at the maximum for a 2 digit decimal number.
         number = 99;
       }
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 10) % 10] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[ number       % 10] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 10) % 10] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[ number       % 10] & 0x7f);
     }
     else {
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 16) % 16] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[ number       % 16] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 16) % 16] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[ number       % 16] & 0x7f);
     }
-    #ifdef USEADDRAUTOMODE
-      this->writeCommand(ADDR_AUTO);                      // Cmd to set auto address mode.
+    #ifdef USEADDRAUTOMODE37
+      this->writeCommand(ADDR_AUTO37);                    // Cmd to set auto address mode.
       this->writeDigit(digit, 2);                         // Write the digits of the 8-bit number.
     #else
-      this->writeCommand(ADDR_FIXED);                     // Cmd to set specific address mode.
+      this->writeCommand(ADDR_FIXED37);                   // Cmd to set specific address mode.
       this->writeDigit(digit);                            // Write the first digit of the 8-bit number.
       this->writeDigit(digit + 1);                        // Write the second digit of the 8-bit number.
     #endif
@@ -190,23 +190,23 @@ void TM1637::displayInt12(uint8_t digit, uint16_t number, bool useDec) {
       if(number > 999) {                                  // Clip the number at the maximum for a 3 digit decimal number.
         number = 999;
       }
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 100) % 10] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[(number /  10) % 10] & 0x7f);
-      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL) | (tmCharTable[ number        % 10] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 100) % 10] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[(number /  10) % 10] & 0x7f);
+      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL37) | (tmCharTable[ number        % 10] & 0x7f);
     }
     else {
       if(number > 0xfff) {                                // Clip the number at the maximum for a 3 digit hexadecimal number.
         number = 0xfff;
       }
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 256) % 16] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[(number /  16) % 16] & 0x7f);
-      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL) | (tmCharTable[ number        % 16] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 256) % 16] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[(number /  16) % 16] & 0x7f);
+      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL37) | (tmCharTable[ number        % 16] & 0x7f);
     }
-    #ifdef USEADDRAUTOMODE
-      this->writeCommand(ADDR_AUTO);                      // Cmd to set auto address mode.
+    #ifdef USEADDRAUTOMODE37
+      this->writeCommand(ADDR_AUTO37);                    // Cmd to set auto address mode.
       this->writeDigit(digit, 3);                         // Write the digits of the 12-bit number.
     #else
-      this->writeCommand(ADDR_FIXED);                     // Cmd to set specific address mode.
+      this->writeCommand(ADDR_FIXED37);                   // Cmd to set specific address mode.
       this->writeDigit(digit);                            // Write the first digit of the 12-bit number.
       this->writeDigit(digit + 1);                        // Write the second digit of the 12-bit number.
       this->writeDigit(digit + 2);                        // Write the third digit of the 12-bit number.
@@ -221,22 +221,22 @@ void TM1637::displayInt16(uint8_t digit, uint16_t number, bool useDec) {
       if(number > 9999) {                                 // Clip the number at the maximum for a 4 digit decimal number.
         number = 9999;
       }
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 1000) % 10] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[(number /  100) % 10] & 0x7f);
-      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL) | (tmCharTable[(number /   10) % 10] & 0x7f);
-      _registers[digit + 3] = (_registers[digit + 3] & DP_CTRL) | (tmCharTable[ number         % 10] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 1000) % 10] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[(number /  100) % 10] & 0x7f);
+      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL37) | (tmCharTable[(number /   10) % 10] & 0x7f);
+      _registers[digit + 3] = (_registers[digit + 3] & DP_CTRL37) | (tmCharTable[ number         % 10] & 0x7f);
     }
     else {
-      _registers[digit]     = (_registers[digit]     & DP_CTRL) | (tmCharTable[(number / 4096) % 16] & 0x7f);
-      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL) | (tmCharTable[(number /  256) % 16] & 0x7f);
-      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL) | (tmCharTable[(number /   16) % 16] & 0x7f);
-      _registers[digit + 3] = (_registers[digit + 3] & DP_CTRL) | (tmCharTable[ number         % 16] & 0x7f);
+      _registers[digit]     = (_registers[digit]     & DP_CTRL37) | (tmCharTable[(number / 4096) % 16] & 0x7f);
+      _registers[digit + 1] = (_registers[digit + 1] & DP_CTRL37) | (tmCharTable[(number /  256) % 16] & 0x7f);
+      _registers[digit + 2] = (_registers[digit + 2] & DP_CTRL37) | (tmCharTable[(number /   16) % 16] & 0x7f);
+      _registers[digit + 3] = (_registers[digit + 3] & DP_CTRL37) | (tmCharTable[ number         % 16] & 0x7f);
     }
-    #ifdef USEADDRAUTOMODE
-      this->writeCommand(ADDR_AUTO);                      // Cmd to set auto address mode.
+    #ifdef USEADDRAUTOMODE37
+      this->writeCommand(ADDR_AUTO37);                    // Cmd to set auto address mode.
       this->writeDigit(digit, 4);                         // Write the digits of the 16-bit number.
     #else
-      this->writeCommand(ADDR_FIXED);                     // Cmd to set specific address mode.
+      this->writeCommand(ADDR_FIXED37);                   // Cmd to set specific address mode.
       this->writeDigit(digit);                            // Write the first digit of the 16-bit number.
       this->writeDigit(digit + 1);                        // Write the second digit of the 16-bit number.
       this->writeDigit(digit + 2);                        // Write the third digit of the 16-bit number.
@@ -250,7 +250,7 @@ void TM1637::displayDP(uint8_t digit, bool status) {
   // Boundry check the digit number, leftmost digit is #0.
   if(digit < _numDigits) {
     bitWrite(_registers[digit], 7, status);
-    this->writeCommand(ADDR_FIXED);                       // Cmd to set specific address mode.
+    this->writeCommand(ADDR_FIXED37);                     // Cmd to set specific address mode.
     this->writeDigit(digit);                              // Write the digit decimal point to the display.
   }
 }
@@ -267,11 +267,11 @@ void TM1637::writeCommand(uint8_t command) {
   this->stop();                                           // Send the stop signal to the TM1637.
 }
 
-#ifndef USEADDRAUTOMODE
+#ifndef USEADDRAUTOMODE37
   // Write the given logical digit value to the correct physical digit.
   void TM1637::writeDigit(uint8_t digit) {
     this->start();                                        // Send the start signal to the TM1637.
-    this->writeByte(STARTADDR + _tmDigitMap[digit]);      // Set the address for the requested digit.
+    this->writeByte(STARTADDR37 + _tmDigitMap[digit]);    // Set the address for the requested digit.
     this->writeByte(_registers[digit]);                   // Write the number to the display digit.
     this->stop();                                         // Send the stop signal to the TM1637.
   }
@@ -280,7 +280,7 @@ void TM1637::writeCommand(uint8_t command) {
   void TM1637::writeDigit(uint8_t digit, uint8_t numDigits) {
     uint8_t digitCounter;
     this->start();                                        // Send the start signal to the TM1637.
-    this->writeByte(STARTADDR + digit);                   // Write the digit start address to the TM1637.
+    this->writeByte(STARTADDR37 + digit);                 // Write the digit start address to the TM1637.
     for(digitCounter = 0; digitCounter < numDigits; digitCounter++) {
       this->writeByte(_registers[digit + digitCounter]);  // Write the current number to the display digit.
     }

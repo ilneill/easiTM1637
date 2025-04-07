@@ -39,10 +39,10 @@ void setup() {
   Serial.begin(9600);
   // TM1637 auto addressing mode, or fixed addressing mode and the default digit map.
   // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
-  //myDisplay.begin(NUMDIGITS, INTENSITY_TYP);
+  //myDisplay.begin(NUMDIGITS, INTENSITY_TYP37);
   // TM1637 fixed addressing mode using a supplied digit map.
   // Digits = 6, Brightness = 2, Display cleared (all segments OFF and decimal points OFF).
-  myDisplay.begin(tmDigitMap, NUMDIGITS, INTENSITY_TYP);
+  myDisplay.begin(tmDigitMap, NUMDIGITS, INTENSITY_TYP37);
   Serial.println("\nDisplay physical to logical mapping test.");
   findDigitMap();
   Serial.println("\nDisplay brightness and digit tests.");
@@ -135,7 +135,7 @@ void findDigitMap() {
 void testDisplay() {
   byte counter, brightness, character;
   // Display brightness test.
-  for(brightness = INTENSITY_MIN; brightness <= INTENSITY_MAX; brightness++) {
+  for(brightness = INTENSITY_MIN37; brightness <= INTENSITY_MAX37; brightness++) {
     myDisplay.displayBrightness(brightness);
     for(counter = 0; counter < NUMDIGITS; counter++) {
       myDisplay.displayChar(counter, brightness);
@@ -144,7 +144,7 @@ void testDisplay() {
   }
   // Clear the display and set the brightness to the typical value.
   myDisplay.displayClear();
-  myDisplay.displayBrightness(INTENSITY_TYP);
+  myDisplay.displayBrightness(INTENSITY_TYP37);
   // Cycle through each code in the character table, deliberately exceeding the table size by 1 to finish on a default space (0x00).
   for(character = 0; character <= myDisplay.charTableSize; character++) {
     // Display all characters on all display digits.
